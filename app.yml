@@ -1,0 +1,47 @@
+version: '3'
+services:
+  authService:
+    image: auth-api
+    container_name: authService    
+    environment:      
+      HTTP_PORT: "${HTTP_PORT}"
+      JWT_SECRET: "${JWT_SECRET}"
+  redis:
+    container_name: redis
+    image: redis:4.0.6-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+        - ./redis:/redis
+  coreService:
+    image: core-api
+    container_name: coreService
+    depends_on:
+      - redis
+    links:
+      - redis
+    environment:      
+      HTTP_PORT: "${HTTP_PORT}"
+      JWT_SECRET: "${JWT_SECRET}"
+      REDIS_URL: "${REDIS_URL}"
+  connector:
+    image: connector
+    container_name: connector 
+    depends_on:
+      - redis
+    environment:      
+      REDIS_URL: "${REDIS_URL}"
+  nginx:
+    image: nginx:1.19.6-alpine
+    volumes:
+    - ./default.conf.template:/etc/nginx/templates/default.conf.template
+    ports:
+    # set port to expose rc2.1 on (8000 default)
+    - "8000:80"
+    depends_on:
+      - authService
+      - coreService
+    environment:      
+      - HTTP_PORT
+      
+

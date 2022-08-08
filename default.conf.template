@@ -1,0 +1,18 @@
+server {
+    listen 80;
+    server_name localhost;
+    error_log  /var/log/nginx/error.log;
+
+    root /usr/share/nginx/html;
+
+	
+	location /auth {
+	        proxy_pass http://authService:${HTTP_PORT}/;
+	    }
+	
+	    location /transaction {
+	        proxy_pass http://coreService:${HTTP_PORT}/transaction;
+	    }
+	
+   
+}
